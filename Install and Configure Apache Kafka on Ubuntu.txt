@@ -1,0 +1,76 @@
+Install ZooKeeper
+=================
+
+Before installing Apache Kafka, you will need to have zookeeper available and running. ZooKeeper is an open source service for maintaining configuration information, providing distributed synchronization, naming and providing group services.
+
+By default ZooKeeper package is available in Ubuntu's default repository, you can install it by running the following command:
+
+sudo apt-get install zookeeperd
+Once installation is finished, it will be started as a daemon automatically. By default ZooKeeper will run on port 2181.
+
+You can test it by running the following command:
+
+netstat -ant | grep :2181
+If everything's fine, you should see the following Output:
+
+tcp6       0      0 :::2181                 :::*                    LISTEN
+
+
+Download Apache Kafka
+====================
+
+wget http://www-us.apache.org/dist/kafka/1.0.1/kafka_2.12-1.0.1.tgz
+Then extract the archive file
+tar xzf kafka_2.12-1.0.1.tgz
+mv kafka_2.12-1.0.1 /usr/local/kafka
+
+
+Step 3 – Start Kafka Server
+===========================
+cd /usr/local/kafka
+bin/zookeeper-server-start.sh config/zookeeper.properties
+
+Now start the Kafka server:
+
+bin/kafka-server-start.sh config/server.properties
+
+...
+[2018-03-13 10:47:45,989] INFO Kafka version : 1.0.1 (org.apache.kafka.common.utils.AppInfoParser)
+[2018-03-13 10:47:45,995] INFO Kafka commitId : c0518aa65f25317e (org.apache.kafka.common.utils.AppInfoParser)
+[2018-03-13 10:47:46,006] INFO [KafkaServer id=0] started (kafka.server.KafkaServer)
+
+Step 4 – Create a Topic in Kafka
+================================
+bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic testTopic
+
+Created topic "testTopic".
+
+The replication-factor describes how many copies of data will be created. As we are running with single instance keep this value 1.
+
+Now you can see the created topic on Kafka by runnin gthe list topic command:
+
+bin/kafka-topics.sh --list --zookeeper localhost:2181
+
+testTopic
+
+Step 5 – Send Messages to Kafka
+===============================
+The “producer” is the process responsible for put data into our Kafka. The Kafka comes with a command line client that will take input from a file or from standard input and send it out as messages to the Kafka cluster. The default Kafka send each line as a separate message.
+
+Let’s run the producer and then type a few messages into the console to send to the server.
+
+bin/kafka-console-producer.sh --broker-list localhost:9092 --topic testTopic
+
+>Welcome to kafka
+>This is my first topic
+>
+
+Step 6 – Using Kafka Consumer
+=============================
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic testTopic --from-beginning
+
+Welcome to kafka
+This is my first topic
+
+Now, If you have still running Kafka producer (Step #5) in another terminal. Just type some text on that producer terminal. it will immediately visible on consumer terminal. See the below screenshot of Kafka producer and consumer in working:
+
